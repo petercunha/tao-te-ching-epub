@@ -11,6 +11,8 @@ An EPUB edition of Lao Tzu's *Tao Te Ching: The Book of the Way* (Sam Torode tra
 - A preview of Epictetus's *The Manual*
 - A table of contents that links to every chapter
 
+Typos in the source post are corrected in `build.py` (see `CORRECTIONS`).
+
 ## Rebuilding
 ```sh
 curl -sL https://vialogue.wordpress.com/2021/12/14/tao-te-ching/ -o page.html

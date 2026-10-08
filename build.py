@@ -15,6 +15,50 @@ def clean(el):
     return h
 
 FIX={'TREU GREATNESS':'TRUE GREATNESS'}
+
+# Typos in the source post, keyed by chapter number (0 = the Epictetus preview).
+# Each correction must match exactly once.
+CORRECTIONS={
+ 2:[('the high and the loaw','the high and the low'),('if it not sincere','if it is not sincere')],
+ 3:[('silent don’t he subject','silent on the subject'),('hearts of their people','hearts of their people.')],
+ 4:[('<br/>\nYet it is never','<br/>\nyet it is never')],
+ 9:[('ist he way','is the way')],
+ 12:[('appearnaces','appearances')],
+ 13:[('both to be feared.','both to be feared,')],
+ 16:[('Seek and open mind','Seek an open mind'),('seeing the big-picture','seeing the big picture')],
+ 21:[('infinitely illusive','infinitely elusive'),('Illusive, indeed','Elusive, indeed')],
+ 24:[('things things—','these things—'),('fi to be trimmed','fit to be trimmed')],
+ 27:[('no scrips','no scripts'),('an oucast','an outcast')],
+ 31:[('never exalt over','never exult over'),('with sorro.','with sorrow.')],
+ 32:[('sweet ew drops','sweet dew drops'),('knowing where to stop,','Knowing where to stop,')],
+ 33:[('who dar risk','who dare risk')],
+ 34:[('not pround','not proud')],
+ 38:[('ist he mere','is the mere'),('appearnace','appearance')],
+ 39:[('it would fall<br/>','it would fall;<br/>'),('would issipate','would dissipate')],
+ 42:[('things which is a gain','things which it is a gain')],
+ 44:[('what they ahve','what they have')],
+ 46:[('than disconent','than discontent')],
+ 49:[('the treats <strong>[<em>sic</em>]</strong> the unfaithful','and treats the unfaithful')],
+ 52:[('those who babble and meddle in other’s business.','Those who babble and meddle in others’ business')],
+ 54:[('well-lanted','well-planted'),('One nation for','one nation for')],
+ 57:[('restraingt','restraint')],
+ 60:[('rule and empire','rule an empire')],
+ 64:[('That which is meager','that which is meager')],
+ 65:[('people ar difficult to govern.','people are difficult to govern,')],
+ 67:[('Their mediocrity','their mediocrity')],
+ 78:[('conqueror <strong>[<em>sic</em>]</strong>','conquer'),('Every one knows','Everyone knows')],
+ 80:[('safe and ocntent','safe and content')],
+ 81:[('steal from other ','steal from others ')],
+ 0:[('| What, then','What, then')],
+}
+def correct(num,paras):
+    joined='\x00'.join(paras)
+    for old,new in CORRECTIONS.get(num,[]):
+        n=joined.count(old)
+        assert n==1, f'correction {old!r} in chapter {num} matched {n} times'
+        joined=joined.replace(old,new)
+    return joined.split('\x00')
+
 els=[e for e in c.find_all(recursive=False)]
 sections=[]  # (kind, title, num, paras)
 cur=None
@@ -34,10 +78,14 @@ for e in els:
             cur[3].append(('h',t))
         continue
     if e.name=='p' and cur and t:
-        h=clean(e).replace('the high and the loaw','the high and the low')
-        cur[3].append(('p',h))
+        cur[3].append(('p',clean(e)))
 print(len(sections), [x[2] for x in sections if x[0]=='chapter'][-3:])
 assert sum(1 for x in sections if x[0]=='chapter')==81
+for sec in sections:
+    if sec[0] in ('chapter','preview'):
+        ps=[p for k,p in sec[3] if k=='p']
+        fixed=iter(correct(sec[2] or 0,ps))
+        sec[3]=[(k,next(fixed) if k=='p' else p) for k,p in sec[3]]
 
 CSS='''
 @namespace epub "http://www.idpf.org/2007/ops";
